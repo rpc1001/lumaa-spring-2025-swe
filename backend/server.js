@@ -76,12 +76,30 @@ app.post("/auth/login", async (req, res) => {
   }
 });
 
-app.post("/tasks", async (req, res) => {
-  try {
-    const { title, description, user_id } = req.body;
+const authToken = (req, res, next) => {
+  const token = req.header("Authorization");
 
-    if (!title || !user_id) {
-      return res.status(400).json({ error: "Title and user_id are required." });
+  if (!token) {
+    return res.status(401).json({ error: "Access denied. No token provided." });
+  }
+
+  try {
+    const verified = jwt.verify(token.replace("Bearer ", ""), process.env.JWT_SECRET);
+    req.user = verified; // attach user info to the request
+    next();
+  } catch (err) {
+    res.status(403).json({ error: "Invalid token" });
+  }
+};
+
+app.post("/tasks", authToken, async (req, res) => {
+  try {
+    const { title, description } = req.body;
+
+    const user_id = req.user.user_id; // get user_id from token instead of req
+
+    if (!title) {
+      return res.status(400).json({ error: "Title required." });
     }
 
     //insert task into db
@@ -97,13 +115,10 @@ app.post("/tasks", async (req, res) => {
   }
 })
 
-app.get("/tasks", async (req, res) => {
+app.get("/tasks", authToken, async (req, res) => {
   try {
-    const { user_id } = req.query;
-    
-    if (!user_id) {
-      return res.status(400).json({ error: "Valid user_id is required." });
-    }
+    const user_id = req.user.user_id; // get user_id from token instead of req  
+
     // get task from db
     const tasks = await pool.query(
       "SELECT * FROM tasks WHERE user_id = $1",
@@ -117,11 +132,17 @@ app.get("/tasks", async (req, res) => {
   }
 });
 
-app.put("/tasks/:id", async (req, res) => {
+app.put("/tasks/:id", authToken, async (req, res) => {
   try {
     const { id } = req.params;
     const { title, description, isComplete } = req.body;
+    const user_id = req.user.user_id; // get user_id from token instead of req
 
+    // check if tasks belongs to the authenticated user
+    const task = await pool.query("SELECT * FROM tasks WHERE id = $1 AND user_id = $2", [id, user_id]);
+    if (task.rows.length === 0) {
+      return res.status(403).json({ error: "Unauthorized to update this task" });
+    }
 
     // going to make the  query dynamically based on provided fields
     let query = "UPDATE tasks SET";
@@ -162,21 +183,24 @@ app.put("/tasks/:id", async (req, res) => {
 });
 
 
-app.delete("/tasks/:id", async (req, res) => {
+app.delete("/tasks/:id", authToken, async (req, res) => {
   try {
     const { id } = req.params;
+    const user_id = req.user.user_id; // get user_id from token instead of req
 
     if (!id) {
       return res.status(400).json({ error: "Invalid task ID." });
     }
 
-    const deleteTask = await pool.query("DELETE FROM tasks WHERE id = $1 RETURNING *", [id]);
-
-    if (deleteTask.rows.length === 0) {
-      return res.status(404).json({ error: "Task not found." });
+    // check if tasks belongs to the authenticated user
+    const task = await pool.query("SELECT * FROM tasks WHERE id = $1 AND user_id = $2", [id, user_id]);
+    if (task.rows.length === 0) {
+      return res.status(403).json({ error: "Unauthorized to update this task" });
     }
 
+    await pool.query("DELETE FROM tasks WHERE id = $1", [id]);
     res.json({ message: "Task deleted" });
+
   } catch (err) {
     console.error(err.message);
     res.status(500).send("Server error");
