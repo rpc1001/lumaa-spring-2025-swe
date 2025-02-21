@@ -23,6 +23,14 @@ app.post("/auth/register", async (req, res) => {
   try {
     const { username, password } = req.body;
 
+    if (!username || !password) {
+      return res.status(400).json({ error: "Username and password are required." });
+    }
+
+    if (password.length < 6) {
+      return res.status(400).json({ error: "Password must be at least 6 characters long." });
+    }
+
     // hash the password
     const saltRounds = 10;
     const hashedPassword = await bcrypt.hash(password, saltRounds);
@@ -43,7 +51,11 @@ app.post("/auth/register", async (req, res) => {
 app.post("/tasks", async (req, res) => {
   try {
     const { title, description, user_id } = req.body;
-    
+
+    if (!title || !user_id) {
+      return res.status(400).json({ error: "Title and user_id are required." });
+    }
+
     //insert task into db
     const newTask = await pool.query(
       "INSERT INTO tasks (title, description, user_id) VALUES ($1, $2, $3) RETURNING *",
@@ -61,6 +73,9 @@ app.get("/tasks", async (req, res) => {
   try {
     const { user_id } = req.query;
     
+    if (!user_id) {
+      return res.status(400).json({ error: "Valid user_id is required." });
+    }
     // get task from db
     const tasks = await pool.query(
       "SELECT * FROM tasks WHERE user_id = $1",
@@ -73,6 +88,51 @@ app.get("/tasks", async (req, res) => {
     res.status(500).send("Server error");
   }
 });
+
+app.put("/tasks/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { title, description, isComplete } = req.body;
+
+
+    // going to make the  query dynamically based on provided fields
+    let query = "UPDATE tasks SET";
+    let values = [];
+    let count = 1;
+
+    if (title) {
+      query += ` title = $${count++},`;
+      values.push(title);
+    }
+
+    if (description) {
+      query += ` description = $${count++},`;
+      values.push(description);
+    }
+
+    if (isComplete !== undefined) {
+      query += ` isComplete = $${count++},`;
+      values.push(isComplete);
+    }
+
+    // get rid of that last comma
+    query = query.slice(0, -1);
+    query += ` WHERE id = $${count} RETURNING *`;
+    values.push(id);
+
+    const updatedTask = await pool.query(query, values);
+
+    if (updatedTask.rows.length === 0) {
+      return res.status(404).json({ error: "Task not found." });
+    }
+
+    res.json(updatedTask.rows[0]);
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send("Server error");
+  }
+});
+
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`Port: ${PORT}`));
