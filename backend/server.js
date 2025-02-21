@@ -49,11 +49,28 @@ app.post("/tasks", async (req, res) => {
       "INSERT INTO tasks (title, description, user_id) VALUES ($1, $2, $3) RETURNING *",
       [title, description, user_id]
     );
-    
+
     res.json(newTask.rows[0]);
   } catch (err) {
     console.error(err.message);
     res.status(500).send("Server err");
+  }
+})
+
+app.get("/tasks", async (req, res) => {
+  try {
+    const { user_id } = req.query;
+    
+    // get task from db
+    const tasks = await pool.query(
+      "SELECT * FROM tasks WHERE user_id = $1",
+      [user_id]
+    );
+
+    res.json(tasks.rows);
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send("Server error");
   }
 });
 
