@@ -10,6 +10,8 @@ app.use(cors());
 const bcrypt = require("bcrypt");
 const { Pool } = require('pg');
 
+const jwt = require("jsonwebtoken");
+
 const pool = new Pool({
   user: process.env.DB_USER,
   database: process.env.DB_NAME,
@@ -42,6 +44,32 @@ app.post("/auth/register", async (req, res) => {
     );
 
     res.json(newUser.rows[0]);
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send("Server error");
+  }
+});
+
+app.post("/auth/login", async (req, res) => {
+  try {
+    const { username, password } = req.body;
+
+    // check if user exists
+    const user = await pool.query("SELECT * FROM users WHERE username = $1", [username]);
+    if (user.rows.length === 0) {
+      return res.status(401).json({ error: "Invalid credentials" });
+    }
+
+    // compare password
+    const validPassword = await bcrypt.compare(password, user.rows[0].password);
+    if (!validPassword) {
+      return res.status(401).json({ error: "Invalid credentials" });
+    }
+
+    // gen JWT Token
+    const token = jwt.sign({ user_id: user.rows[0].id }, process.env.JWT_SECRET, { expiresIn: "1h" });
+
+    res.json({ token });
   } catch (err) {
     console.error(err.message);
     res.status(500).send("Server error");
