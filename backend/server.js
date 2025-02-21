@@ -40,5 +40,22 @@ app.post("/auth/register", async (req, res) => {
   }
 });
 
+app.post("/tasks", async (req, res) => {
+  try {
+    const { title, description, user_id } = req.body;
+    
+    //insert task into db
+    const newTask = await pool.query(
+      "INSERT INTO tasks (title, description, user_id) VALUES ($1, $2, $3) RETURNING *",
+      [title, description, user_id]
+    );
+    
+    res.json(newTask.rows[0]);
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send("Server err");
+  }
+});
+
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`Port: ${PORT}`));
