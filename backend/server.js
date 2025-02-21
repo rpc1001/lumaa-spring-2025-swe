@@ -134,5 +134,27 @@ app.put("/tasks/:id", async (req, res) => {
 });
 
 
+app.delete("/tasks/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    if (!id) {
+      return res.status(400).json({ error: "Invalid task ID." });
+    }
+
+    const deleteTask = await pool.query("DELETE FROM tasks WHERE id = $1 RETURNING *", [id]);
+
+    if (deleteTask.rows.length === 0) {
+      return res.status(404).json({ error: "Task not found." });
+    }
+
+    res.json({ message: "Task deleted" });
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send("Server error");
+  }
+});
+
+
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`Port: ${PORT}`));
