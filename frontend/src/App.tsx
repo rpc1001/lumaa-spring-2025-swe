@@ -1,33 +1,24 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { useState } from 'react';
+import { useContext } from 'react';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import TasksPage from './pages/TasksPage';
 import { AuthContext } from './context/AuthContext';
+import AuthProvider from './context/AuthProvider';
 
 import { JSX } from 'react';
 
+const ProtectedRoute = ({ children }: { children: JSX.Element }) => {
+  const auth = useContext(AuthContext);
+  if (!auth?.token) {
+    return <Navigate to="/login" replace />;
+  }
+  return children;
+};
+
 function App() {
-  const [token, setToken] = useState<string | null>(localStorage.getItem('token'));
-
-  const login = (newToken: string) => {
-    localStorage.setItem('token', newToken);
-    setToken(newToken);
-  };
-
-  const logout = () => {
-    localStorage.removeItem('token');
-    setToken(null);
-  };
-  const ProtectedRoute = ({ children }: { children: JSX.Element }) => {
-    if (!token) {
-      return <Navigate to="/login" replace />;
-    }
-    return children;
-  };
-
   return (
-    <AuthContext.Provider value={{ token, login, logout }}>
+    <AuthProvider>
       <Router>
         <Routes>
           <Route path="/login" element={<LoginPage />} />
@@ -40,10 +31,10 @@ function App() {
               </ProtectedRoute>
             } 
           />
-          <Route path="*" element={<Navigate to={token ? "/tasks" : "/login"} replace />} />
+          <Route path="*" element={<Navigate to="/login" replace />} />
         </Routes>
       </Router>
-    </AuthContext.Provider>
+    </AuthProvider>
   );
 }
 
