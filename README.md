@@ -1,5 +1,9 @@
 # Task Management API - Temporary README Update
 
+## 📋 Demo Video
+Coming soon
+---
+
 ## **Overview**
 Full-stack Task Management application with authentication and task CRUD functionality.
 
@@ -7,7 +11,7 @@ Full-stack Task Management application with authentication and task CRUD functio
 
 ## **Backend Setup**
 <details>
-  <summary>📌 Database Setup (PostgreSQL)</summary>
+  <summary> Database Setup </summary>
 
 ### **1. Install PostgreSQL**
 ```bash
@@ -119,16 +123,31 @@ curl -X DELETE http://localhost:3000/tasks/1 \
 ---
 
 <details>
-  <summary>🎨 Frontend Setup (Coming Soon)</summary>
-- Steps to run the frontend will be added here.
+  <summary>🎨 Frontend Setup</summary>
+
+### Install Dependencies
+```bash
+npm install
+```
+
+### Create `.env` File
+```bash
+VITE_API_URL=http://localhost:3000
+```
+Replace `http://localhost:3000` with your deployed backend URL if needed.
+
+### Start the Frontend
+```bash
+npm run dev
+```
+This will start the frontend at `http://localhost:5173`.
 </details>
 
 ---
 
 <details>
-  <summary>📋 Pay and  Demo</summary>
-- Steps to run the frontend will be added here
+  <summary>Salary Expectation</summary>
+I expect $25 an hour x 40 hours a week -> $4000 per month
 </details>
 
 ---
- More details will be added soon!
