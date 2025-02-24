@@ -1,7 +1,8 @@
-const pool = require("../config/db");
+const poolPromise = require("../config/db");
 
 const createTask = async (req, res) => {
   try {
+    const pool = await poolPromise;
     const { title, description } = req.body;
     const user_id = req.user.user_id; // get user_id from token instead of req
 
@@ -24,6 +25,7 @@ const createTask = async (req, res) => {
 
 const getTasks = async (req, res) => {
   try {
+    const pool = await poolPromise;
     const user_id = req.user.user_id; // get user_id from token instead of req  
 
     // get task from db
@@ -41,6 +43,7 @@ const getTasks = async (req, res) => {
 
 const updateTask = async (req, res) => {
   try {
+    const pool = await poolPromise;
     const { id } = req.params;
     const { title, description, isComplete } = req.body;
     const user_id = req.user.user_id; // get user_id from token instead of req
@@ -91,6 +94,7 @@ const updateTask = async (req, res) => {
 
 const deleteTask = async (req, res) => {
   try {
+    const pool = await poolPromise;
     const { id } = req.params;
     const user_id = req.user.user_id; // get user_id from token instead of req
 

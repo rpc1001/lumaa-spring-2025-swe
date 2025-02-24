@@ -1,30 +1,31 @@
-# Task Management API - Temporary README Update
+# Task Management Application
 
-## 📋 Demo Video
-Coming soon
----
-
-## **Overview**
-Full-stack Task Management application with authentication and task CRUD functionality.
-
----
+## 💋 Demo Video
+A short demo showing user registration, login, and task management will be added soon.
 
 ## **Backend Setup**
 <details>
-  <summary> Database Setup </summary>
+  <summary>Database Setup</summary>
 
-### **1. Install PostgreSQL**
+### ⚡ **Automatic Database Setup**
+
+#### **1. Install PostgreSQL**
 ```bash
 brew install postgresql@14
 brew services start postgresql@14
 ```
 
-### **2. Create the Database**
+The backend **automatically creates the database and tables** if they do not exist.  
+
+### **Manual Setup (Optional)**
+If you prefer to manually configure PostgreSQL, follow these steps:
+
+#### **1. Create the Database**
 ```sql
 CREATE DATABASE task_management;
 ```
 
-### **3. Set up Tables**
+#### **2. Set up Tables**
 ```sql
 CREATE TABLE users (
     id SERIAL PRIMARY KEY,
@@ -45,7 +46,7 @@ CREATE TABLE tasks (
 ---
 
 <details>
-  <summary>🚀 Setting up and Running the Backend</summary>
+  <summary> Setting up and Running the Backend</summary>
 
 ### **1. Clone the Repository**
 ```bash
@@ -59,22 +60,49 @@ npm install
 ```
 
 ### **3. Create `.env` File**
+Create a `.env` file inside the `backend/` folder with the following content:
 ```env
 DB_USER=your_username
 DB_NAME=task_management
 JWT_SECRET=your_generated_secret_key
+PORT=3000
 ```
 
 ### **4. Start the Backend**
 ```bash
 npm run dev
 ```
+This starts the backend at `http://localhost:3000`.
 </details>
 
 ---
 
 <details>
-  <summary>🛠 Testing the Backend with cURL</summary>
+  <summary>Frontend Setup</summary>
+
+### **1. Install Dependencies**
+```bash
+npm install
+```
+
+### **2. Create `.env` File**
+Create a `.env` file inside the `frontend/` folder with the following content:
+```env
+VITE_API_URL=http://localhost:3000
+```
+Replace `http://localhost:3000` with your deployed backend URL if needed.
+
+### **3. Start the Frontend**
+```bash
+npm run dev
+```
+This will start the frontend at `http://localhost:5173`.
+</details>
+
+---
+
+<details>
+  <summary> API Endpoints (For Testing)</summary>
 
 #### **1. Register a New User**
 ```bash
@@ -89,7 +117,7 @@ curl -X POST http://localhost:3000/auth/login \
 -H "Content-Type: application/json" \
 -d '{"username": "newuser", "password": "mypassword"}'
 ```
-_This will return a token to use in subsequent requests._
+_This returns a token to use in requests._
 
 #### **3. Create a Task (Authenticated Route)**
 ```bash
@@ -123,31 +151,12 @@ curl -X DELETE http://localhost:3000/tasks/1 \
 ---
 
 <details>
-  <summary>🎨 Frontend Setup</summary>
+  <summary> Pay and Demo</summary>
 
-### Install Dependencies
-```bash
-npm install
-```
-
-### Create `.env` File
-```bash
-VITE_API_URL=http://localhost:3000
-```
-Replace `http://localhost:3000` with your deployed backend URL if needed.
-
-### Start the Frontend
-```bash
-npm run dev
-```
-This will start the frontend at `http://localhost:5173`.
+- **Salary Expectation:** I expect **$25/hour** × **40 hours/week** → **$4000 per month**.
+- **Demo Video:** Will be provided soon.
 </details>
 
 ---
-
-<details>
-  <summary>Salary Expectation</summary>
-I expect $25 an hour x 40 hours a week -> $4000 per month
-</details>
 
 ---

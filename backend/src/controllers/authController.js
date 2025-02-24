@@ -1,9 +1,10 @@
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
-const pool = require("../config/db");
+const poolPromise = require("../config/db");
 
 const registerUser = async (req, res) => {
   try {
+    const pool = await poolPromise;
     const { username, password } = req.body;
 
     if (!username || !password) {
@@ -33,6 +34,7 @@ const registerUser = async (req, res) => {
 
 const loginUser = async (req, res) => {
   try {
+    const pool = await poolPromise;
     const { username, password } = req.body;
 
     // check if user exists

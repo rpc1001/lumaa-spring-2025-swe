@@ -8,7 +8,7 @@ interface Task {
   id: number;
   title: string;
   description: string;
-  isComplete: boolean;
+  iscomplete: boolean;
 }
 
 const TasksPage = () => {
@@ -27,7 +27,17 @@ const TasksPage = () => {
         const response = await axios.get(`${import.meta.env.VITE_API_URL}/tasks`, {
           headers: { Authorization: `Bearer ${auth?.token}` },
         });
-        setTasks(response.data);
+        console.log('Tasks from server:', response.data);
+
+        const sortedTasks = [...response.data].sort((a, b) => {
+          // first separate complete and incomplete
+          if (a.iscomplete !== b.iscomplete) {
+            return a.iscomplete ? 1 : -1; // incomplete tasks first
+          }
+          // then sort by ID within each group (highest to lowest)
+          return b.id - a.id;
+        });
+        setTasks(sortedTasks);
       } catch {
         console.error("Failed to fetch tasks");
       }
@@ -66,7 +76,7 @@ const TasksPage = () => {
 
   const handleToggleComplete = async (task: Task) => {
     try {
-      const updatedTask = { ...task, isComplete: !task.isComplete };
+      const updatedTask = { ...task, isComplete: !task.iscomplete };
       const response = await axios.put(
         `${import.meta.env.VITE_API_URL}/tasks/${task.id}`,
         updatedTask,
@@ -156,7 +166,7 @@ const TasksPage = () => {
             {tasks.map((task) => (
               <div 
                 key={task.id} 
-                className={`task-card ${task.isComplete ? 'completed' : ''}`}
+                className={`task-card ${task.iscomplete ? 'completed' : ''}`}
               >
                 {isEditing === task.id ? (
                   <div className="edit-mode">
@@ -178,13 +188,14 @@ const TasksPage = () => {
                 ) : (
                   <>
                     <div className="task-header">
-                      <h3 className={task.isComplete ? 'completed-title' : ''}>{task.title}</h3>
+                      <h3 className={task.iscomplete ? 'completed-title' : ''}>{task.title}</h3>
                       <div className="task-toggle">
                         <input
                           type="checkbox"
-                          checked={task.isComplete}
+                          checked={task.iscomplete}
                           onChange={() => handleToggleComplete(task)}
                           id={`task-${task.id}`}
+                          onClick={() => console.log('Current task state:', task)} 
                         />
                         <label htmlFor={`task-${task.id}`}></label>
                       </div>
